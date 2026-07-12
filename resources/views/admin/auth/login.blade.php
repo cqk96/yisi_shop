@@ -17,8 +17,8 @@
                 </div>
             @endif
 
-            <label for="email">邮箱</label>
-            <input id="email" type="email" name="email" value="{{ old('email', 'admin@example.com') }}" required>
+            <label for="account">账号</label>
+            <input id="account" type="text" name="account" value="{{ old('account', 'yisi') }}" required>
 
             <label for="password" style="margin-top: 14px;">密码</label>
             <input id="password" type="password" name="password" required>

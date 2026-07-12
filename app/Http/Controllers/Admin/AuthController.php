@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -19,22 +21,29 @@ class AuthController extends Controller
 
     public function store(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $data = $request->validate([
+            'account' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()->withErrors('邮箱或密码不正确。')->withInput($request->only('email'));
+        $user = User::where('email', $data['account'])
+            ->orWhere('name', $data['account'])
+            ->first();
+
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            return back()
+                ->withErrors('账号或密码不正确。')
+                ->withInput($request->only('account'));
         }
 
+        if (! $user->is_super_admin) {
+            return back()
+                ->withErrors('当前账号没有后台权限。')
+                ->withInput($request->only('account'));
+        }
+
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
-
-        if (! Auth::user()->is_super_admin) {
-            Auth::logout();
-
-            return back()->withErrors('当前账号没有后台权限。');
-        }
 
         return redirect()->intended(route('admin.dashboard'));
     }
