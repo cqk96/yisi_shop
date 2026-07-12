@@ -5,8 +5,7 @@
 @section('content')
     @php
         $priceMap = $product->exists ? $product->prices->pluck('price', 'currency_code')->all() : [];
-        $imageList = old('images', $product->exists ? $product->images->pluck('image_url')->all() : []);
-        $imageRows = array_pad($imageList, 5, '');
+        $imageList = $product->exists ? $product->images : collect();
         $skuList = old('skus', $product->exists ? $product->skus->map(function ($sku) {
             return [
                 'name' => $sku->name,
@@ -23,7 +22,7 @@
         <a class="button secondary" href="{{ route('admin.products.index') }}">返回</a>
     </div>
 
-    <form class="panel" method="post" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}">
+    <form class="panel" method="post" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" enctype="multipart/form-data">
         @csrf
         @if ($product->exists)
             @method('put')
@@ -108,15 +107,40 @@
 
             <div class="full">
                 <h2>商品图片</h2>
-                <p class="muted">每行填写一张图片 URL，第一张会作为商品主图。</p>
-                <div class="form-grid">
-                    @foreach ($imageRows as $index => $imageUrl)
-                        <div>
-                            <label for="image_{{ $index }}">图片 {{ $index + 1 }}</label>
-                            <input id="image_{{ $index }}" type="url" name="images[]" value="{{ $imageUrl }}" placeholder="https://example.com/product.jpg">
-                        </div>
-                    @endforeach
-                </div>
+                <p class="muted">图片上传到服务器保存。取消保留图片或删除商品时，服务器上的本地图片文件会自动删除。</p>
+
+                @if ($imageList->count())
+                    <div class="table-wrap" style="margin-bottom: 14px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>预览</th>
+                                    <th>图片路径</th>
+                                    <th>保留</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($imageList as $image)
+                                    <tr>
+                                        <td>
+                                            <img src="{{ $image->image_url }}" alt="{{ $image->alt_text }}" style="height: 70px; object-fit: cover; width: 90px;">
+                                        </td>
+                                        <td class="muted">{{ $image->image_url }}</td>
+                                        <td>
+                                            <label style="align-items: center; display: flex; gap: 8px; font-weight: 400;">
+                                                <input type="checkbox" name="existing_images[]" value="{{ $image->image_url }}" checked style="width: auto;">
+                                                保留
+                                            </label>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                <label for="image_files">上传新图片</label>
+                <input id="image_files" type="file" name="image_files[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
             </div>
 
             <div class="full">

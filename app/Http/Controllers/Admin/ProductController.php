@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -66,6 +67,9 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        $this->deleteStoredImages($product->images()->pluck('image_url')->all());
+        $this->deleteStoredImage($product->image_url);
+
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('status', '商品已删除。');
@@ -79,8 +83,10 @@ class ProductController extends Controller
             'slug' => ['nullable', 'string', 'max:150', Rule::unique('products')->ignore($product)],
             'description' => ['required', 'string', 'max:5000'],
             'is_active' => ['nullable', 'boolean'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'url', 'max:1000'],
+            'existing_images' => ['nullable', 'array'],
+            'existing_images.*' => ['nullable', 'string', 'max:1000'],
+            'image_files' => ['nullable', 'array'],
+            'image_files.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
             'prices' => ['required', 'array'],
             'prices.*' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'skus' => ['required', 'array'],
@@ -105,10 +111,19 @@ class ProductController extends Controller
             ]);
         }
 
-        $images = collect(Arr::get($data, 'images', []))
+        $allowedExistingImages = $product
+            ? $product->images()->pluck('image_url')->all()
+            : [];
+
+        $images = collect(Arr::get($data, 'existing_images', []))
             ->filter()
+            ->filter(function ($imageUrl) use ($allowedExistingImages) {
+                return in_array($imageUrl, $allowedExistingImages, true);
+            })
             ->values()
             ->all();
+
+        $images = array_merge($images, $this->storeUploadedImages($request));
 
         $skus = collect(Arr::get($data, 'skus', []))
             ->map(function ($sku) {
@@ -156,6 +171,11 @@ class ProductController extends Controller
 
     private function syncImages(Product $product, array $images): void
     {
+        $oldImages = $product->images()->pluck('image_url')->all();
+        $removedImages = array_diff($oldImages, $images);
+
+        $this->deleteStoredImages($removedImages);
+
         $product->images()->delete();
 
         foreach ($images as $index => $imageUrl) {
@@ -165,6 +185,51 @@ class ProductController extends Controller
                 'sort_order' => $index,
             ]);
         }
+    }
+
+    private function storeUploadedImages(Request $request): array
+    {
+        $storedImages = [];
+
+        foreach ($request->file('image_files', []) as $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+
+            $path = $file->store('product-images', 'public');
+            $storedImages[] = Storage::disk('public')->url($path);
+        }
+
+        return $storedImages;
+    }
+
+    private function deleteStoredImages(array $imageUrls): void
+    {
+        foreach (array_unique(array_filter($imageUrls)) as $imageUrl) {
+            $this->deleteStoredImage($imageUrl);
+        }
+    }
+
+    private function deleteStoredImage(?string $imageUrl): void
+    {
+        if (! $imageUrl) {
+            return;
+        }
+
+        $path = parse_url($imageUrl, PHP_URL_PATH) ?: $imageUrl;
+        $prefix = '/storage/';
+
+        if (! Str::startsWith($path, $prefix)) {
+            return;
+        }
+
+        $storagePath = Str::after($path, $prefix);
+
+        if (! Str::startsWith($storagePath, 'product-images/')) {
+            return;
+        }
+
+        Storage::disk('public')->delete($storagePath);
     }
 
     private function syncPrices(Product $product, array $prices): void
