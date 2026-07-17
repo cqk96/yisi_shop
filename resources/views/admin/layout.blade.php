@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', '后台管理') - LaravelShop</title>
+    <title>@yield('title', __('ui.admin.title')) - LaravelShop</title>
     <style>
         :root {
             --bg: #f4f6f8;
@@ -38,6 +38,20 @@
             display: flex;
             justify-content: space-between;
             padding: 14px 24px;
+        }
+        .language-switcher {
+            align-items: center;
+            display: inline-flex;
+            gap: 8px;
+            margin: 0;
+        }
+        .language-switcher span {
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .language-switcher select {
+            min-width: 112px;
+            padding: 7px 10px;
         }
         .content { padding: 24px; }
         .page-head {

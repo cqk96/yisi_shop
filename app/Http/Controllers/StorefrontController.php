@@ -46,6 +46,8 @@ class StorefrontController extends Controller
     {
         abort_unless($product->is_active, 404);
 
+        $product->increment('view_count');
+
         return view('shop.show', [
             'product' => $product->load(['category', 'images', 'prices', 'activeSkus']),
             'cartSummary' => $cart->summary(),

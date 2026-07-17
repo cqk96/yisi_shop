@@ -28,7 +28,7 @@ class CategoryController extends Controller
     {
         Category::create($this->validatedData($request));
 
-        return redirect()->route('admin.categories.index')->with('status', '分类已创建。');
+        return redirect()->route('admin.categories.index')->with('status', __('ui.messages.category_created'));
     }
 
     public function edit(Category $category)
@@ -42,18 +42,18 @@ class CategoryController extends Controller
     {
         $category->update($this->validatedData($request, $category));
 
-        return redirect()->route('admin.categories.index')->with('status', '分类已更新。');
+        return redirect()->route('admin.categories.index')->with('status', __('ui.messages.category_updated'));
     }
 
     public function destroy(Category $category)
     {
         if ($category->products()->exists()) {
-            return back()->withErrors('该分类下还有商品，不能删除。');
+            return back()->withErrors(__('ui.messages.category_has_products'));
         }
 
         $category->delete();
 
-        return redirect()->route('admin.categories.index')->with('status', '分类已删除。');
+        return redirect()->route('admin.categories.index')->with('status', __('ui.messages.category_deleted'));
     }
 
     private function validatedData(Request $request, ?Category $category = null): array

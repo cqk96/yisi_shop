@@ -1,28 +1,28 @@
 @extends('layouts.app')
 
-@section('title', '购物车 - LaravelShop')
+@section('title', __('ui.cart.title') . ' - LaravelShop')
 
 @section('content')
     <div class="page-head">
         <div>
-            <h1>购物车</h1>
-            <p class="muted">同一商品的不同 SKU 会独立计算库存和数量。</p>
+            <h1>{{ __('ui.cart.title') }}</h1>
+            <p class="muted">{{ __('ui.cart.subtitle') }}</p>
         </div>
-        <a class="button secondary" href="{{ route('shop.index') }}">继续购物</a>
+        <a class="button secondary" href="{{ route('shop.index') }}">{{ __('ui.shop.continue_shopping') }}</a>
     </div>
 
     @if ($cartSummary['items']->isEmpty())
-        <div class="panel">购物车还是空的。</div>
+        <div class="panel">{{ __('ui.cart.empty') }}</div>
     @else
         <table class="table">
             <thead>
                 <tr>
-                    <th>商品</th>
+                    <th>{{ __('ui.common.product') }}</th>
                     <th>SKU</th>
-                    <th>单价</th>
-                    <th>数量</th>
-                    <th>小计</th>
-                    <th>操作</th>
+                    <th>{{ __('ui.common.price') }}</th>
+                    <th>{{ __('ui.common.quantity') }}</th>
+                    <th>{{ __('ui.common.subtotal') }}</th>
+                    <th>{{ __('ui.common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,23 +37,23 @@
                             @if ($item['sku']->code)
                                 <div class="muted">{{ $item['sku']->code }}</div>
                             @endif
-                            <div class="muted">库存 {{ $item['sku']->stock }}</div>
+                            <div class="muted">{{ __('ui.common.stock') }} {{ $item['sku']->stock }}</div>
                         </td>
-                        <td>&yen;{{ number_format($item['unit_price'], 2) }}</td>
+                        <td>{{ $item['currency'] }} {{ number_format($item['unit_price'], 2) }}</td>
                         <td>
                             <form class="line-actions" method="post" action="{{ route('cart.items.update', $item['sku']) }}">
                                 @csrf
                                 @method('patch')
                                 <input type="number" name="quantity" min="1" max="{{ max(1, $item['sku']->stock) }}" value="{{ $item['quantity'] }}">
-                                <button class="button secondary" type="submit">更新</button>
+                                <button class="button secondary" type="submit">{{ __('ui.common.update') }}</button>
                             </form>
                         </td>
-                        <td>&yen;{{ number_format($item['subtotal'], 2) }}</td>
+                        <td>{{ $item['currency'] }} {{ number_format($item['subtotal'], 2) }}</td>
                         <td>
                             <form method="post" action="{{ route('cart.items.destroy', $item['sku']) }}">
                                 @csrf
                                 @method('delete')
-                                <button class="button danger" type="submit">移除</button>
+                                <button class="button danger" type="submit">{{ __('ui.common.remove') }}</button>
                             </form>
                         </td>
                     </tr>
@@ -63,10 +63,10 @@
 
         <div class="summary">
             <div>
-                <strong>合计：&yen;{{ number_format($cartSummary['total'], 2) }}</strong>
-                <div class="muted">共 {{ $cartSummary['count'] }} 件商品</div>
+                <strong>{{ __('ui.common.total') }}: {{ $cartSummary['currency'] }} {{ number_format($cartSummary['total'], 2) }}</strong>
+                <div class="muted">{{ __('ui.cart.items_count', ['count' => $cartSummary['count']]) }}</div>
             </div>
-            <a class="button" href="{{ route('checkout.create') }}">去结算</a>
+            <a class="button" href="{{ route('checkout.create') }}">{{ __('ui.cart.checkout') }}</a>
         </div>
     @endif
 @endsection

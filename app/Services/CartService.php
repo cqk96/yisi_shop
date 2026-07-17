@@ -68,12 +68,13 @@ class CartService
                 }
 
                 $quantity = min((int) $quantity, $sku->stock);
-                $unitPrice = (float) $sku->product->priceFor('CNY');
+                $unitPrice = $sku->product->displayPrice();
                 $subtotal = $unitPrice * $quantity;
 
                 return [
                     'sku' => $sku,
                     'product' => $sku->product,
+                    'currency' => $sku->product->displayCurrency(),
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'subtotal' => $subtotal,
@@ -85,6 +86,7 @@ class CartService
         return [
             'items' => $items,
             'count' => $items->sum('quantity'),
+            'currency' => $items->first()['currency'] ?? 'USD',
             'total' => $items->sum('subtotal'),
         ];
     }

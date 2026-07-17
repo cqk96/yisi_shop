@@ -3,10 +3,12 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductQrCodeController as AdminProductQrCodeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [StorefrontController::class, 'index'])->name('shop.index');
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 Route::get('/products/{product:slug}', [StorefrontController::class, 'show'])->name('products.show');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -41,6 +44,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('super.admin')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update']);
         Route::get('products/{product}/qr-code', [AdminProductQrCodeController::class, 'show'])->name('products.qr-code');
         Route::resource('products', AdminProductController::class)->except(['show']);
     });

@@ -16,6 +16,7 @@ class Order extends Model
         'customer_phone',
         'shipping_address',
         'status',
+        'currency',
         'total',
     ];
 

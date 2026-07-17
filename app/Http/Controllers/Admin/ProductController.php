@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
-    private array $currencies = ['CNY', 'USD', 'EUR', 'HKD'];
+    private array $currencies = ['USD', 'HKD', 'CUP'];
 
     public function index()
     {
@@ -41,7 +41,7 @@ class ProductController extends Controller
         $this->syncPrices($product, $data['prices']);
         $this->syncSkus($product, $data['skus']);
 
-        return redirect()->route('admin.products.index')->with('status', '商品已创建。');
+        return redirect()->route('admin.products.index')->with('status', __('ui.messages.product_created'));
     }
 
     public function edit(Product $product)
@@ -62,7 +62,7 @@ class ProductController extends Controller
         $this->syncPrices($product, $data['prices']);
         $this->syncSkus($product, $data['skus']);
 
-        return redirect()->route('admin.products.index')->with('status', '商品已更新。');
+        return redirect()->route('admin.products.index')->with('status', __('ui.messages.product_updated'));
     }
 
     public function destroy(Product $product)
@@ -72,7 +72,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('admin.products.index')->with('status', '商品已删除。');
+        return redirect()->route('admin.products.index')->with('status', __('ui.messages.product_deleted'));
     }
 
     private function validatedData(Request $request, ?Product $product = null): array
@@ -82,11 +82,14 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'slug' => ['nullable', 'string', 'max:150', Rule::unique('products')->ignore($product)],
             'description' => ['required', 'string', 'max:5000'],
+            'sales_count' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'is_active' => ['nullable', 'boolean'],
             'existing_images' => ['nullable', 'array'],
             'existing_images.*' => ['nullable', 'string', 'max:1000'],
             'image_files' => ['nullable', 'array'],
             'image_files.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'enabled_currencies' => ['required', 'array', 'min:1'],
+            'enabled_currencies.*' => ['string', Rule::in($this->currencies)],
             'prices' => ['required', 'array'],
             'prices.*' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'skus' => ['required', 'array'],
@@ -96,19 +99,42 @@ class ProductController extends Controller
             'skus.*.is_active' => ['nullable', 'boolean'],
         ]);
 
+        $enabledCurrencies = collect(Arr::get($data, 'enabled_currencies', []))
+            ->map(function ($currency) {
+                return strtoupper($currency);
+            })
+            ->filter(function ($currency) {
+                return in_array($currency, $this->currencies, true);
+            })
+            ->unique()
+            ->values()
+            ->all();
+
         $prices = collect($data['prices'])
             ->mapWithKeys(function ($price, $currency) {
                 return [strtoupper($currency) => $price];
             })
+            ->only($enabledCurrencies)
             ->filter(function ($price) {
                 return $price !== null && $price !== '';
             })
             ->all();
 
-        if (! isset($prices['CNY'])) {
-            throw ValidationException::withMessages([
-                'prices.CNY' => '至少需要填写 CNY 人民币价格。',
-            ]);
+        $missingPrices = collect($enabledCurrencies)
+            ->filter(function ($currency) use ($prices) {
+                return ! isset($prices[$currency]);
+            })
+            ->values()
+            ->all();
+
+        if (! empty($missingPrices)) {
+            $messages = [];
+
+            foreach ($missingPrices as $currency) {
+                $messages['prices.' . $currency] = __('ui.messages.price_required', ['currency' => $currency]);
+            }
+
+            throw ValidationException::withMessages($messages);
         }
 
         $allowedExistingImages = $product
@@ -142,7 +168,7 @@ class ProductController extends Controller
 
         if (empty($skus)) {
             throw ValidationException::withMessages([
-                'skus' => '至少需要填写一个 SKU。',
+                'skus' => __('ui.messages.sku_required'),
             ]);
         }
 
@@ -158,8 +184,9 @@ class ProductController extends Controller
                 'name' => $data['name'],
                 'slug' => $data['slug'] ?: Str::slug($data['name']),
                 'description' => $data['description'],
-                'price' => $prices['CNY'],
+                'price' => $prices[$enabledCurrencies[0]],
                 'stock' => $activeStock,
+                'sales_count' => (int) ($data['sales_count'] ?? 0),
                 'image_url' => $images[0] ?? null,
                 'is_active' => $request->boolean('is_active'),
             ],

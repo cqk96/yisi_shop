@@ -3,19 +3,21 @@
 @section('body')
     <div class="shell">
         <aside class="sidebar">
-            <a class="brand" href="{{ route('admin.dashboard') }}">LaravelShop 后台</a>
-            <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">仪表盘</a>
-            <a class="side-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">分类管理</a>
-            <a class="side-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">商品管理</a>
-            <a class="side-link" href="{{ route('shop.index') }}" target="_blank">打开商城</a>
+            <a class="brand" href="{{ route('admin.dashboard') }}">{{ __('ui.admin.brand') }}</a>
+            <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">{{ __('ui.admin.dashboard') }}</a>
+            <a class="side-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">{{ __('ui.admin.category_management') }}</a>
+            <a class="side-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">{{ __('ui.admin.product_management') }}</a>
+            <a class="side-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">{{ __('ui.admin.order_management') }}</a>
+            <a class="side-link" href="{{ route('shop.index') }}" target="_blank">{{ __('ui.admin.open_shop') }}</a>
         </aside>
 
         <div class="main">
             <header class="topbar">
-                <span>当前账号：{{ auth()->user()->email }}</span>
+                <span>{{ __('ui.admin.current_account', ['email' => auth()->user()->email]) }}</span>
+                @include('partials.language-switcher')
                 <form method="post" action="{{ route('admin.logout') }}">
                     @csrf
-                    <button class="button secondary" type="submit">退出登录</button>
+                    <button class="button secondary" type="submit">{{ __('ui.admin.logout') }}</button>
                 </form>
             </header>
             <main class="content">

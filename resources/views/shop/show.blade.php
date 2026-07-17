@@ -145,6 +145,8 @@
         $galleryImages = $product->images->count()
             ? $product->images
             : collect([(object) ['image_url' => $product->primaryImage(), 'alt_text' => $product->name]]);
+        $displayCurrency = $product->displayCurrency();
+        $displayPrice = $product->displayPrice();
     @endphp
 
     <div class="detail">
@@ -152,8 +154,8 @@
             <div class="zoom-stage" data-zoom-stage>
                 <img src="{{ $galleryImages->first()->image_url }}" alt="{{ $galleryImages->first()->alt_text ?: $product->name }}" data-zoom-image>
                 @if ($galleryImages->count() > 1)
-                    <button class="gallery-arrow prev" type="button" data-gallery-prev aria-label="上一张图片">&lsaquo;</button>
-                    <button class="gallery-arrow next" type="button" data-gallery-next aria-label="下一张图片">&rsaquo;</button>
+                    <button class="gallery-arrow prev" type="button" data-gallery-prev aria-label="{{ __('ui.shop.previous_image') }}">&lsaquo;</button>
+                    <button class="gallery-arrow next" type="button" data-gallery-next aria-label="{{ __('ui.shop.next_image') }}">&rsaquo;</button>
                 @endif
                 <div class="zoom-lens" data-zoom-lens></div>
             </div>
@@ -178,11 +180,11 @@
             <p class="muted">{{ $product->category->name }}</p>
             <h1>{{ $product->name }}</h1>
             <p>{{ $product->description }}</p>
-            <p class="price">&yen;{{ number_format($product->priceFor('CNY'), 2) }}</p>
+            <p class="price">{{ $displayCurrency }} {{ number_format($displayPrice, 2) }}</p>
 
-            @if ($product->prices->count() > 1)
+            @if ($product->prices->whereIn('currency_code', ['USD', 'HKD', 'CUP'])->count() > 1)
                 <p class="muted">
-                    @foreach ($product->prices as $price)
+                    @foreach ($product->prices->whereIn('currency_code', ['USD', 'HKD', 'CUP']) as $price)
                         {{ $price->currency_code }} {{ number_format($price->price, 2) }}{{ $loop->last ? '' : ' / ' }}
                     @endforeach
                 </p>
@@ -190,7 +192,7 @@
 
             <form method="post" action="{{ route('cart.items.store') }}">
                 @csrf
-                <label>选择 SKU</label>
+                <label>{{ __('ui.shop.select_sku') }}</label>
                 <div class="sku-options">
                     @forelse ($product->activeSkus as $sku)
                         <label class="sku-option">
@@ -209,18 +211,18 @@
                                     <span class="muted">({{ $sku->code }})</span>
                                 @endif
                             </span>
-                            <span class="muted">库存 {{ $sku->stock }}</span>
+                            <span class="muted">{{ __('ui.common.stock') }} {{ $sku->stock }}</span>
                         </label>
                     @empty
-                        <div class="alert error">该商品还没有可售 SKU。</div>
+                        <div class="alert error">{{ __('ui.shop.no_salable_sku') }}</div>
                     @endforelse
                 </div>
 
-                <p class="muted">当前 SKU 库存 <span data-selected-stock>{{ $firstSku ? $firstSku->stock : 0 }}</span></p>
-                <label for="quantity">购买数量</label>
+                <p class="muted">{{ __('ui.shop.current_sku_stock') }} <span data-selected-stock>{{ $firstSku ? $firstSku->stock : 0 }}</span></p>
+                <label for="quantity">{{ __('ui.shop.purchase_quantity') }}</label>
                 <input id="quantity" type="number" name="quantity" min="1" max="{{ $firstSku ? max(1, $firstSku->stock) : 1 }}" value="1" style="margin: 8px 0 14px;">
-                <button class="button" type="submit" {{ ! $firstSku || $firstSku->stock <= 0 ? 'disabled' : '' }}>加入购物车</button>
-                <a class="button secondary" href="{{ route('shop.index') }}">返回列表</a>
+                <button class="button" type="submit" {{ ! $firstSku || $firstSku->stock <= 0 ? 'disabled' : '' }}>{{ __('ui.common.add_to_cart') }}</button>
+                <a class="button secondary" href="{{ route('shop.index') }}">{{ __('ui.common.back_to_list') }}</a>
             </form>
         </aside>
     </div>

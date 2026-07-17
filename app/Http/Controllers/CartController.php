@@ -31,12 +31,12 @@ class CartController extends Controller
         }
 
         if ($sku->stock <= 0) {
-            return back()->withErrors('该 SKU 暂时缺货。');
+            return back()->withErrors(__('ui.messages.sku_out_of_stock'));
         }
 
         $cart->add($sku, (int) $data['quantity']);
 
-        return redirect()->route('cart.index')->with('status', '商品已加入购物车。');
+        return redirect()->route('cart.index')->with('status', __('ui.messages.cart_item_added'));
     }
 
     public function update(Request $request, ProductSku $sku, CartService $cart)
@@ -47,13 +47,13 @@ class CartController extends Controller
 
         $cart->put($sku->id, (int) $data['quantity']);
 
-        return redirect()->route('cart.index')->with('status', '购物车已更新。');
+        return redirect()->route('cart.index')->with('status', __('ui.messages.cart_updated'));
     }
 
     public function destroy(ProductSku $sku, CartService $cart)
     {
         $cart->remove($sku->id);
 
-        return redirect()->route('cart.index')->with('status', '商品已移出购物车。');
+        return redirect()->route('cart.index')->with('status', __('ui.messages.cart_item_removed'));
     }
 }

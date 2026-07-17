@@ -9,6 +9,12 @@ class Product extends Model
 {
     use HasFactory;
 
+    private const DISPLAY_CURRENCY_PRIORITY = [
+        'USD' => 0,
+        'HKD' => 1,
+        'CUP' => 2,
+    ];
+
     protected $fillable = [
         'category_id',
         'name',
@@ -16,6 +22,8 @@ class Product extends Model
         'description',
         'price',
         'stock',
+        'sales_count',
+        'view_count',
         'image_url',
         'is_active',
     ];
@@ -23,6 +31,8 @@ class Product extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',
+        'sales_count' => 'integer',
+        'view_count' => 'integer',
         'is_active' => 'boolean',
     ];
 
@@ -61,11 +71,39 @@ class Product extends Model
         return $this->images->first()->image_url ?? $this->image_url;
     }
 
-    public function priceFor(string $currencyCode = 'CNY')
+    public function priceFor(string $currencyCode = 'USD')
     {
         $price = $this->prices->firstWhere('currency_code', strtoupper($currencyCode));
 
         return $price ? $price->price : $this->price;
+    }
+
+    public function displayPriceRecord()
+    {
+        $prices = $this->relationLoaded('prices') ? $this->prices : $this->prices()->get();
+
+        return $prices
+            ->filter(function ($price) {
+                return array_key_exists($price->currency_code, self::DISPLAY_CURRENCY_PRIORITY);
+            })
+            ->sortBy(function ($price) {
+                return self::DISPLAY_CURRENCY_PRIORITY[$price->currency_code] ?? 999;
+            })
+            ->first();
+    }
+
+    public function displayPrice(): float
+    {
+        $price = $this->displayPriceRecord();
+
+        return $price ? (float) $price->price : (float) $this->price;
+    }
+
+    public function displayCurrency(): string
+    {
+        $price = $this->displayPriceRecord();
+
+        return $price ? $price->currency_code : 'USD';
     }
 
     public function availableStock(): int

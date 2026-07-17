@@ -15,7 +15,7 @@ class CheckoutController extends Controller
         $summary = $cart->summary();
 
         if ($summary['items']->isEmpty()) {
-            return redirect()->route('cart.index')->withErrors('购物车为空，无法结算。');
+            return redirect()->route('cart.index')->withErrors(__('ui.messages.cart_empty_checkout'));
         }
 
         return view('checkout.create', [
@@ -35,7 +35,7 @@ class CheckoutController extends Controller
         $summary = $cart->summary();
 
         if ($summary['items']->isEmpty()) {
-            return redirect()->route('cart.index')->withErrors('购物车为空，无法结算。');
+            return redirect()->route('cart.index')->withErrors(__('ui.messages.cart_empty_checkout'));
         }
 
         $order = DB::transaction(function () use ($data, $summary) {
@@ -46,6 +46,7 @@ class CheckoutController extends Controller
                 'customer_phone' => $data['customer_phone'],
                 'shipping_address' => $data['shipping_address'],
                 'status' => 'pending',
+                'currency' => $summary['currency'],
                 'total' => $summary['total'],
             ]);
 
@@ -53,7 +54,7 @@ class CheckoutController extends Controller
                 $sku = $item['sku']->fresh(['product']);
 
                 if (! $sku || $sku->stock < $item['quantity']) {
-                    throw new \RuntimeException('SKU 库存不足，请返回购物车调整数量。');
+                    throw new \RuntimeException(__('ui.messages.sku_stock_not_enough'));
                 }
 
                 $product = $sku->product;
@@ -78,7 +79,7 @@ class CheckoutController extends Controller
 
         $cart->clear();
 
-        return redirect()->route('orders.show', $order)->with('status', '订单已提交。');
+        return redirect()->route('orders.show', $order)->with('status', __('ui.messages.order_submitted'));
     }
 
     public function show(Order $order)
@@ -88,6 +89,7 @@ class CheckoutController extends Controller
             'cartSummary' => [
                 'items' => collect(),
                 'count' => 0,
+                'currency' => 'USD',
                 'total' => 0,
             ],
         ]);

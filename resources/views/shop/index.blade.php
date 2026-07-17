@@ -1,25 +1,25 @@
 @extends('layouts.app')
 
-@section('title', '商品列表 - LaravelShop')
+@section('title', __('ui.shop.title') . ' - LaravelShop')
 
 @section('content')
     <div class="page-head">
         <div>
-            <h1>商品列表</h1>
-            <p class="muted">浏览商品、选择规格并加入购物车。</p>
+            <h1>{{ __('ui.shop.title') }}</h1>
+            <p class="muted">{{ __('ui.shop.subtitle') }}</p>
         </div>
         <form class="search" method="get" action="{{ route('shop.index') }}">
             @if ($selectedCategory)
                 <input type="hidden" name="category" value="{{ $selectedCategory }}">
             @endif
-            <input type="search" name="q" value="{{ $keyword }}" placeholder="搜索商品">
-            <button class="button" type="submit">搜索</button>
+            <input type="search" name="q" value="{{ $keyword }}" placeholder="{{ __('ui.shop.search_placeholder') }}">
+            <button class="button" type="submit">{{ __('ui.common.search') }}</button>
         </form>
     </div>
 
     <div class="toolbar">
         <div class="chips">
-            <a class="chip {{ $selectedCategory ? '' : 'active' }}" href="{{ route('shop.index', ['q' => $keyword]) }}">全部</a>
+            <a class="chip {{ $selectedCategory ? '' : 'active' }}" href="{{ route('shop.index', ['q' => $keyword]) }}">{{ __('ui.shop.all') }}</a>
             @foreach ($categories as $category)
                 <a class="chip {{ $selectedCategory === $category->slug ? 'active' : '' }}" href="{{ route('shop.index', ['category' => $category->slug, 'q' => $keyword]) }}">
                     {{ $category->name }}
@@ -33,6 +33,8 @@
             @php
                 $firstSku = $product->activeSkus->first();
                 $stock = $product->availableStock();
+                $displayCurrency = $product->displayCurrency();
+                $displayPrice = $product->displayPrice();
             @endphp
             <article class="card">
                 <a href="{{ route('products.show', $product) }}">
@@ -44,32 +46,33 @@
                     </h2>
                     <p class="muted">{{ $product->category->name }}</p>
                     <div class="product-meta">
-                        <span class="price">&yen;{{ number_format($product->priceFor('CNY'), 2) }}</span>
-                        <span class="muted">SKU 库存 {{ $stock }}</span>
+                        <span class="price">{{ $displayCurrency }} {{ number_format($displayPrice, 2) }}</span>
+                        <span class="muted">{{ __('ui.common.stock') }} {{ $stock }}</span>
                     </div>
                     @if ($firstSku)
-                        <form method="post" action="{{ route('cart.items.store') }}">
-                            @csrf
-                            <input type="hidden" name="sku_id" value="{{ $firstSku->id }}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button class="button" type="submit" {{ $stock <= 0 ? 'disabled' : '' }}>加入购物车</button>
-                        </form>
+{{--                        <form class="product-action" method="post" action="{{ route('cart.items.store') }}">--}}
+{{--                            @csrf--}}
+{{--                            <input type="hidden" name="sku_id" value="{{ $firstSku->id }}">--}}
+{{--                            <input type="hidden" name="quantity" value="1">--}}
+{{--                            <button class="button" type="submit" {{ $stock <= 0 ? 'disabled' : '' }}>{{ __('ui.common.add_to_cart') }}</button>--}}
+{{--                        </form>--}}
                     @else
-                        <a class="button secondary" href="{{ route('products.show', $product) }}">选择规格</a>
+                        <a class="button secondary product-action" href="{{ route('products.show', $product) }}">{{ __('ui.shop.choose_sku') }}</a>
                     @endif
+                    <div class="product-sales">{{ __('ui.shop.sales') }} {{ number_format($product->sales_count) }}</div>
                 </div>
             </article>
         @empty
-            <div class="panel">没有找到匹配的商品。</div>
+            <div class="panel">{{ __('ui.shop.empty_products') }}</div>
         @endforelse
     </div>
 
     @if ($products->hasPages())
-        <nav class="pager" aria-label="商品分页">
+        <nav class="pager" aria-label="{{ __('ui.shop.title') }}">
             @if ($products->onFirstPage())
-                <span class="pager-link disabled">上一页</span>
+                <span class="pager-link disabled">{{ __('pagination.previous') }}</span>
             @else
-                <a class="pager-link" href="{{ $products->previousPageUrl() }}">上一页</a>
+                <a class="pager-link" href="{{ $products->previousPageUrl() }}">{{ __('pagination.previous') }}</a>
             @endif
 
             @for ($page = 1; $page <= $products->lastPage(); $page++)
@@ -81,9 +84,9 @@
             @endfor
 
             @if ($products->hasMorePages())
-                <a class="pager-link" href="{{ $products->nextPageUrl() }}">下一页</a>
+                <a class="pager-link" href="{{ $products->nextPageUrl() }}">{{ __('pagination.next') }}</a>
             @else
-                <span class="pager-link disabled">下一页</span>
+                <span class="pager-link disabled">{{ __('pagination.next') }}</span>
             @endif
         </nav>
     @endif

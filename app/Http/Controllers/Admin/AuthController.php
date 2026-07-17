@@ -32,13 +32,13 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             return back()
-                ->withErrors('账号或密码不正确。')
+                ->withErrors(__('ui.messages.invalid_login'))
                 ->withInput($request->only('account'));
         }
 
         if (! $user->is_super_admin) {
             return back()
-                ->withErrors('当前账号没有后台权限。')
+                ->withErrors(__('ui.messages.no_admin_permission'))
                 ->withInput($request->only('account'));
         }
 

@@ -279,7 +279,7 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
-            foreach (['CNY' => $productData['price'], 'USD' => round($productData['price'] / 7.2, 2), 'EUR' => round($productData['price'] / 7.8, 2)] as $currency => $price) {
+            foreach (['USD' => round($productData['price'] / 7.2, 2), 'HKD' => round($productData['price'] / 0.92, 2), 'CUP' => round($productData['price'] * 3.4, 2)] as $currency => $price) {
                 $product->prices()->updateOrCreate(
                     ['currency_code' => $currency],
                     ['price' => $price]

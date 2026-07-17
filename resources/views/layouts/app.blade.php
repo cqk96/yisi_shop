@@ -55,6 +55,20 @@
         .brand { align-items: center; display: inline-flex; }
         .brand img { display: block; height: 56px; width: auto; }
         .nav-links { align-items: center; display: flex; gap: 12px; }
+        .language-switcher {
+            align-items: center;
+            display: inline-flex;
+            gap: 8px;
+            margin: 0;
+        }
+        .language-switcher span {
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .language-switcher select {
+            min-width: 112px;
+            padding: 7px 10px;
+        }
         .cart-link {
             border: 1px solid var(--line);
             border-radius: 6px;
@@ -118,6 +132,8 @@
             background: var(--panel);
             border: 1px solid var(--line);
             border-radius: 8px;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
         .product-image {
@@ -127,13 +143,27 @@
             object-fit: cover;
             width: 100%;
         }
-        .card-body { padding: 16px; }
+        .card-body {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            padding: 16px;
+        }
         .price { color: var(--accent); font-size: 20px; font-weight: 700; }
         .product-meta {
             align-items: center;
             display: flex;
             justify-content: space-between;
             margin: 12px 0;
+        }
+        .product-action {
+            margin-top: auto;
+        }
+        .product-sales {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: right;
         }
         .detail {
             display: grid;
@@ -241,8 +271,9 @@
                 <img src="{{ asset('images/yisi-logo.png') }}" alt="Yisi Nails & Beauty">
             </a>
             <div class="nav-links">
-                <a href="{{ route('shop.index') }}">商品</a>
-                <a class="cart-link" href="{{ route('cart.index') }}">购物车 {{ $cartSummary['count'] ?? 0 }}</a>
+                @include('partials.language-switcher')
+                <a href="{{ route('shop.index') }}">{{ __('ui.common.products') }}</a>
+                <a class="cart-link" href="{{ route('cart.index') }}">{{ __('ui.shop.cart') }} {{ $cartSummary['count'] ?? 0 }}</a>
             </div>
         </nav>
     </header>

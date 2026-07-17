@@ -1,21 +1,21 @@
 @extends('admin.partials.shell')
 
-@section('title', '分类管理')
+@section('title', __('ui.admin.category_management'))
 
 @section('content')
     <div class="page-head">
-        <h1>分类管理</h1>
-        <a class="button" href="{{ route('admin.categories.create') }}">新增分类</a>
+        <h1>{{ __('ui.admin.category_management') }}</h1>
+        <a class="button" href="{{ route('admin.categories.create') }}">{{ __('ui.admin.add_category') }}</a>
     </div>
 
     <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
-                    <th>名称</th>
+                    <th>{{ __('ui.common.name') }}</th>
                     <th>Slug</th>
-                    <th>商品数</th>
-                    <th>操作</th>
+                    <th>{{ __('ui.common.products') }}</th>
+                    <th>{{ __('ui.common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,11 +26,11 @@
                         <td>{{ $category->products_count }}</td>
                         <td>
                             <div class="actions">
-                                <a class="button secondary" href="{{ route('admin.categories.edit', $category) }}">编辑</a>
+                                <a class="button secondary" href="{{ route('admin.categories.edit', $category) }}">{{ __('ui.common.edit') }}</a>
                                 <form method="post" action="{{ route('admin.categories.destroy', $category) }}">
                                     @csrf
                                     @method('delete')
-                                    <button class="button danger" type="submit" onclick="return confirm('确定删除该分类？')">删除</button>
+                                    <button class="button danger" type="submit" onclick="return confirm('{{ __('ui.common.confirm_delete_category') }}')">{{ __('ui.common.delete') }}</button>
                                 </form>
                             </div>
                         </td>
