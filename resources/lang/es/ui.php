@@ -123,6 +123,8 @@ return [
         'sku_name' => 'Nombre SKU',
         'sku_code' => 'Código SKU',
         'sku_image' => 'Imagen principal SKU',
+        'add_sku' => 'Añadir SKU',
+        'click_select_sku_image' => 'Haz clic para elegir imagen',
         'no_sku_image' => 'Sin imagen',
         'remove_sku_image' => 'Eliminar imagen',
         'enabled' => 'Activado',

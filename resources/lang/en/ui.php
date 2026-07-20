@@ -123,6 +123,8 @@ return [
         'sku_name' => 'SKU name',
         'sku_code' => 'SKU code',
         'sku_image' => 'SKU main image',
+        'add_sku' => 'Add SKU',
+        'click_select_sku_image' => 'Click to choose image',
         'no_sku_image' => 'No image',
         'remove_sku_image' => 'Remove image',
         'enabled' => 'Enabled',

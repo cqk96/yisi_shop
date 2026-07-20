@@ -123,6 +123,8 @@ return [
         'sku_name' => 'SKU 名称',
         'sku_code' => 'SKU 编码',
         'sku_image' => 'SKU 主图',
+        'add_sku' => '新增 SKU',
+        'click_select_sku_image' => '点击选择主图',
         'no_sku_image' => '暂无图片',
         'remove_sku_image' => '删除图片',
         'enabled' => '启用',

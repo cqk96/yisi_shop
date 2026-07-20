@@ -22,7 +22,8 @@
                 'is_active' => $sku->is_active ? 1 : 0,
             ];
         })->all() : []);
-        $skuRows = array_pad($skuList, 6, ['id' => null, 'name' => '', 'code' => '', 'image_url' => null, 'stock' => 0, 'is_active' => 1]);
+        $emptySku = ['id' => null, 'name' => '', 'code' => '', 'image_url' => null, 'stock' => 0, 'is_active' => 1];
+        $skuRows = count($skuList) ? $skuList : [$emptySku];
     @endphp
 
     <div class="page-head">
@@ -129,7 +130,10 @@
             </div>
 
             <div class="full">
-                <h2>{{ __('ui.admin.sku_stock') }}</h2>
+                <div class="section-head">
+                    <h2>{{ __('ui.admin.sku_stock') }}</h2>
+                    <button class="button secondary" type="button" data-add-sku-row>{{ __('ui.admin.add_sku') }}</button>
+                </div>
                 <p class="muted">{{ __('ui.admin.sku_hint') }}</p>
                 <div class="table-wrap">
                     <table class="table">
@@ -142,46 +146,16 @@
                                 <th>{{ __('ui.admin.enabled') }}</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody data-sku-rows>
                             @foreach ($skuRows as $index => $sku)
-                                <tr>
-                                    <td>
-                                        <input type="hidden" name="skus[{{ $index }}][id]" value="{{ $sku['id'] ?? '' }}">
-                                        <input type="hidden" name="skus[{{ $index }}][image_url]" value="{{ $sku['image_url'] ?? '' }}">
-                                        <input name="skus[{{ $index }}][name]" value="{{ $sku['name'] ?? '' }}" placeholder="{{ __('ui.admin.sku_name_placeholder') }}">
-                                    </td>
-                                    <td><input name="skus[{{ $index }}][code]" value="{{ $sku['code'] ?? '' }}" placeholder="{{ __('ui.admin.sku_code_placeholder') }}"></td>
-                                    <td>
-                                        <div class="sku-image-field">
-                                            @if (! empty($sku['image_url']))
-                                                <img class="sku-image-preview" src="{{ $sku['image_url'] }}" alt="{{ $sku['name'] ?? '' }}">
-                                                <label class="sku-remove-image">
-                                                    <input type="checkbox" name="skus[{{ $index }}][remove_image]" value="1">
-                                                    {{ __('ui.admin.remove_sku_image') }}
-                                                </label>
-                                            @else
-                                                <div class="sku-image-empty">{{ __('ui.admin.no_sku_image') }}</div>
-                                            @endif
-                                            <input
-                                                type="file"
-                                                name="sku_image_files[{{ $index }}]"
-                                                accept="image/jpeg,image/png,image/webp,image/gif"
-                                                data-sku-image-input
-                                            >
-                                        </div>
-                                    </td>
-                                    <td><input type="number" min="0" name="skus[{{ $index }}][stock]" value="{{ $sku['stock'] ?? 0 }}"></td>
-                                    <td>
-                                        <label style="align-items: center; display: flex; gap: 8px; font-weight: 400;">
-                                            <input type="checkbox" name="skus[{{ $index }}][is_active]" value="1" style="width: auto;" {{ ! empty($sku['is_active']) ? 'checked' : '' }}>
-                                            {{ __('ui.admin.active') }}
-                                        </label>
-                                    </td>
-                                </tr>
+                                @include('admin.products.partials.sku-row', ['index' => $index, 'sku' => $sku])
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+                <template data-sku-row-template>
+                    @include('admin.products.partials.sku-row', ['index' => '__INDEX__', 'sku' => $emptySku])
+                </template>
             </div>
 
             <div class="full">
@@ -293,22 +267,51 @@
             gap: 10px;
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        .section-head {
+            align-items: center;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+        }
+        .section-head h2 {
+            margin-bottom: 0;
+        }
         .sku-image-field {
             display: grid;
             gap: 8px;
-            min-width: 150px;
+            min-width: 132px;
         }
-        .sku-image-preview,
-        .sku-image-empty {
-            aspect-ratio: 1 / 1;
-            border: 1px solid var(--line);
+        .sku-image-picker {
+            align-items: center;
+            background: #f8fafc;
+            border: 1px dashed #94a3b8;
             border-radius: 8px;
-            height: 76px;
-            width: 76px;
+            cursor: pointer;
+            display: flex;
+            height: 92px;
+            justify-content: center;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            width: 112px;
+        }
+        .sku-image-picker:hover {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        }
+        .sku-image-picker input {
+            inset: 0;
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            width: 100%;
         }
         .sku-image-preview {
             background: #ffffff;
+            height: 100%;
             object-fit: cover;
+            width: 100%;
         }
         .sku-image-empty {
             align-items: center;
@@ -316,7 +319,9 @@
             display: flex;
             font-size: 12px;
             justify-content: center;
+            padding: 10px;
             text-align: center;
+            width: 100%;
         }
         .sku-remove-image {
             align-items: center;
@@ -328,6 +333,15 @@
         }
         .sku-remove-image input {
             width: auto;
+        }
+        .sku-actions-cell {
+            display: grid;
+            gap: 8px;
+            min-width: 110px;
+        }
+        .sku-row-remove {
+            min-height: 34px;
+            padding: 6px 10px;
         }
         .image-uploader-shell {
             background: #f8fafc;
@@ -389,7 +403,9 @@
         document.addEventListener('DOMContentLoaded', function () {
             var input = document.querySelector('[data-filepond-upload]');
             var currencyToggles = document.querySelectorAll('[data-currency-toggle]');
-            var skuImageInputs = document.querySelectorAll('[data-sku-image-input]');
+            var skuRows = document.querySelector('[data-sku-rows]');
+            var addSkuRowButton = document.querySelector('[data-add-sku-row]');
+            var skuRowTemplate = document.querySelector('[data-sku-row-template]');
 
             function syncCurrencyField(toggle) {
                 var priceWrap = document.querySelector('[data-currency-price="' + toggle.value + '"]');
@@ -422,7 +438,27 @@
                 });
             });
 
-            skuImageInputs.forEach(function (skuImageInput) {
+            function renumberSkuRows() {
+                if (!skuRows) {
+                    return;
+                }
+
+                Array.prototype.slice.call(skuRows.querySelectorAll('[data-sku-row]')).forEach(function (row, index) {
+                    row.querySelectorAll('[data-sku-name]').forEach(function (field) {
+                        field.name = 'skus[' + index + '][' + field.dataset.skuName + ']';
+                    });
+                    row.querySelectorAll('[data-sku-file]').forEach(function (field) {
+                        field.name = 'sku_image_files[' + index + ']';
+                    });
+                });
+            }
+
+            function bindSkuImageInput(skuImageInput) {
+                if (skuImageInput.dataset.bound === '1') {
+                    return;
+                }
+
+                skuImageInput.dataset.bound = '1';
                 skuImageInput.addEventListener('change', function () {
                     var file = skuImageInput.files && skuImageInput.files[0] ? skuImageInput.files[0] : null;
                     var field = skuImageInput.closest('.sku-image-field');
@@ -437,7 +473,7 @@
                         preview = document.createElement('img');
                         preview.className = 'sku-image-preview';
                         preview.alt = '';
-                        field.insertBefore(preview, field.firstChild);
+                        skuImageInput.closest('.sku-image-picker').insertBefore(preview, skuImageInput);
                     }
 
                     if (empty) {
@@ -446,7 +482,54 @@
 
                     preview.src = URL.createObjectURL(file);
                 });
-            });
+            }
+
+            function bindSkuRow(row) {
+                var imageInput = row.querySelector('[data-sku-image-input]');
+
+                if (imageInput) {
+                    bindSkuImageInput(imageInput);
+                }
+            }
+
+            if (skuRows) {
+                skuRows.querySelectorAll('[data-sku-row]').forEach(bindSkuRow);
+                skuRows.addEventListener('click', function (event) {
+                    var removeButton = event.target.closest('[data-remove-sku-row]');
+
+                    if (!removeButton) {
+                        return;
+                    }
+
+                    var rows = skuRows.querySelectorAll('[data-sku-row]');
+
+                    if (rows.length <= 1) {
+                        return;
+                    }
+
+                    removeButton.closest('[data-sku-row]').remove();
+                    renumberSkuRows();
+                });
+            }
+
+            if (addSkuRowButton && skuRows && skuRowTemplate) {
+                addSkuRowButton.addEventListener('click', function () {
+                    var nextIndex = skuRows.querySelectorAll('[data-sku-row]').length;
+                    var html = skuRowTemplate.innerHTML.replace(/__INDEX__/g, nextIndex);
+                    var wrapper = document.createElement('tbody');
+                    wrapper.innerHTML = html.trim();
+                    var row = wrapper.querySelector('[data-sku-row]');
+
+                    if (!row) {
+                        return;
+                    }
+
+                    skuRows.appendChild(row);
+                    bindSkuRow(row);
+                    renumberSkuRows();
+                    row.querySelector('input[data-sku-name="name"]').focus();
+                });
+            }
 
             if (!input || !window.FilePond) {
                 return;
