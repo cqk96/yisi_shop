@@ -1,5 +1,5 @@
 ﻿<!doctype html>
-<html lang="zh-CN">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -343,9 +343,40 @@
                 -webkit-line-clamp: 3;
             }
             .nav-links {
-                flex-wrap: wrap;
+                -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap;
                 grid-column: 1 / -1;
-                justify-content: center;
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 2px;
+                scrollbar-width: none;
+                white-space: nowrap;
+            }
+            .nav-links::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-links a,
+            .nav-links .cart-link {
+                align-items: center;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                display: inline-flex;
+                flex: 0 0 auto;
+                font-size: 13px;
+                min-height: 34px;
+                padding: 6px 9px;
+            }
+            .language-switcher {
+                flex: 0 0 auto;
+                gap: 5px;
+            }
+            .language-switcher span {
+                font-size: 12px;
+            }
+            .language-switcher select {
+                font-size: 13px;
+                min-width: 88px;
+                padding: 6px 8px;
             }
             .grid {
                 column-count: 2;

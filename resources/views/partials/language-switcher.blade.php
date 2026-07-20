@@ -1,6 +1,6 @@
 @php
     $locale = app()->getLocale();
-    $locales = ['zh_CN', 'en', 'es'];
+    $locales = ['es', 'en', 'zh_CN'];
 @endphp
 
 <label class="language-switcher">

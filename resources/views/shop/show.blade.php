@@ -150,6 +150,15 @@
                 height: 38px;
                 width: 38px;
             }
+            .thumbnail-grid {
+                gap: 8px;
+                grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+                margin-top: 8px;
+            }
+            .thumbnail-grid img {
+                aspect-ratio: 1 / 1;
+                border-width: 1px;
+            }
         }
     </style>
 

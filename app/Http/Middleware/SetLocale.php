@@ -11,10 +11,10 @@ class SetLocale
 
     public function handle(Request $request, Closure $next)
     {
-        $locale = $request->session()->get('locale', config('app.locale'));
+        $locale = $request->session()->get('locale', config('app.locale', 'es'));
 
         if (! in_array($locale, $this->locales, true)) {
-            $locale = 'zh_CN';
+            $locale = 'es';
         }
 
         app()->setLocale($locale);
