@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $product->name . ' - LaravelShop')
+@section('title', $product->name)
 
 @section('content')
     <style>

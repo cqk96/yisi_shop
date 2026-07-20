@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Yisi Nails & Beauty')</title>
+    @php($pageTitle = trim($__env->yieldContent('title')))
+    <title>{{ $pageTitle !== '' ? 'Yisi - ' . $pageTitle : 'Yisi' }}</title>
     <style>
         :root {
             color-scheme: light;

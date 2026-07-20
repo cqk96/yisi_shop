@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('ui.shop.title') . ' - LaravelShop')
+@section('title', __('ui.shop.title'))
 
 @section('content')
     <div class="page-head">
