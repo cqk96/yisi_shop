@@ -399,7 +399,7 @@
                 -webkit-overflow-scrolling: touch;
                 flex-wrap: nowrap;
                 grid-column: 1 / -1;
-                justify-content: flex-start;
+                justify-content: flex-end;
                 overflow-x: auto;
                 padding-bottom: 2px;
                 scrollbar-width: none;
