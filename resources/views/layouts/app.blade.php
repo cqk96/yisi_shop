@@ -399,10 +399,12 @@
                 -webkit-overflow-scrolling: touch;
                 flex-wrap: nowrap;
                 grid-column: 1 / -1;
-                justify-content: flex-end;
+                gap: 6px;
+                justify-content: space-between;
                 overflow-x: auto;
                 padding-bottom: 2px;
                 scrollbar-width: none;
+                width: 100%;
                 white-space: nowrap;
             }
             .nav-links::-webkit-scrollbar {
@@ -414,21 +416,25 @@
                 border: 1px solid var(--line);
                 border-radius: 6px;
                 display: inline-flex;
-                flex: 0 0 auto;
+                flex: 1 1 0;
                 font-size: 13px;
+                justify-content: center;
                 min-height: 34px;
+                min-width: 0;
                 padding: 6px 9px;
             }
             .language-switcher {
-                flex: 0 0 auto;
+                flex: 1 1 0;
                 gap: 5px;
+                justify-content: center;
+                min-width: 0;
             }
             .language-switcher span {
-                font-size: 12px;
+                display: none;
             }
             .language-switcher select {
                 font-size: 13px;
-                min-width: 88px;
+                min-width: 0;
                 padding: 6px 8px;
             }
             .grid {
