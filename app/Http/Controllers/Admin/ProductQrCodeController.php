@@ -15,7 +15,7 @@ class ProductQrCodeController extends Controller
         $logoPath = public_path('images/yisi-logo.png');
 
         $qrCode = new QrCode($url);
-        $qrCode->setWriterByName('png');
+        $qrCode->setWriterByName('svg');
         $qrCode->setSize(520);
         $qrCode->setMargin(18);
         $qrCode->setEncoding('UTF-8');
@@ -29,7 +29,7 @@ class ProductQrCodeController extends Controller
             $qrCode->setLogoSize(130, 84);
         }
 
-        $filename = 'product-' . $product->id . '-qr.png';
+        $filename = 'product-' . $product->id . '-qr.svg';
 
         return response($qrCode->writeString(), 200, [
             'Content-Type' => $qrCode->getContentType(),
