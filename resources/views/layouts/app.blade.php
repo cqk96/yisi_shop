@@ -347,8 +347,72 @@
                 grid-column: 1 / -1;
                 justify-content: center;
             }
+            .grid {
+                column-count: 2;
+                column-gap: 12px;
+                display: block;
+            }
+            .product-grid-count-1,
+            .product-grid-count-2 {
+                column-count: auto;
+                display: grid;
+                gap: 12px;
+            }
+            .product-grid-count-1 {
+                grid-template-columns: 1fr;
+            }
+            .product-grid-count-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .grid .card {
+                break-inside: avoid;
+                display: inline-flex;
+                margin: 0 0 12px;
+                width: 100%;
+            }
+            .product-grid-count-1 .card,
+            .product-grid-count-2 .card {
+                display: flex;
+                margin: 0;
+            }
+            .grid .panel {
+                display: inline-block;
+                width: 100%;
+            }
+            .product-image {
+                aspect-ratio: auto;
+                height: auto;
+            }
+            .card-body {
+                padding: 11px;
+            }
+            .card-body h2 {
+                font-size: 15px !important;
+                line-height: 1.25;
+            }
+            .product-meta {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+                margin: 9px 0;
+            }
+            .price {
+                font-size: 16px;
+            }
+            .original-price,
+            .product-sales {
+                font-size: 12px;
+            }
             .detail, .form-grid { grid-template-columns: 1fr; }
             .table { display: block; overflow-x: auto; }
+        }
+        @media (max-width: 380px) {
+            .grid {
+                column-gap: 10px;
+            }
+            .card-body {
+                padding: 10px;
+            }
         }
     </style>
 </head>

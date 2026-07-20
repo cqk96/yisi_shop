@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <div class="grid">
+    <div class="grid product-grid product-grid-count-{{ $products->count() }}">
         @forelse ($products as $product)
             @php
                 $firstSku = $product->activeSkus->first();
