@@ -143,12 +143,74 @@
             }
         }
         @media (max-width: 560px) {
+            .product-detail {
+                align-items: start;
+                gap: 8px;
+                grid-template-columns: minmax(0, 1.08fr) minmax(128px, 0.82fr) !important;
+            }
+            .product-detail .panel {
+                border-radius: 8px;
+                padding: 8px;
+            }
+            .product-detail .panel h1 {
+                font-size: 15px;
+                line-height: 1.2;
+                margin-bottom: 5px;
+            }
+            .product-detail .panel p {
+                font-size: 11px;
+                line-height: 1.3;
+                margin-bottom: 6px;
+            }
+            .product-detail .price {
+                font-size: 14px;
+                line-height: 1.2;
+            }
             .zoom-stage {
-                min-height: 260px;
+                aspect-ratio: 1 / 1.18;
+                min-height: 0;
             }
             .gallery-arrow {
-                height: 38px;
-                width: 38px;
+                font-size: 22px;
+                height: 30px;
+                width: 30px;
+            }
+            .gallery-arrow.prev { left: 8px; }
+            .gallery-arrow.next { right: 8px; }
+            .sku-options {
+                gap: 5px;
+                margin: 5px 0 7px;
+            }
+            .sku-option {
+                align-items: flex-start;
+                flex-direction: column;
+                font-size: 11px;
+                gap: 4px;
+                padding: 6px;
+            }
+            .sku-option-main {
+                gap: 5px;
+            }
+            .sku-option-image {
+                height: 26px;
+                width: 26px;
+            }
+            .product-detail label {
+                font-size: 11px;
+            }
+            .product-detail .muted {
+                font-size: 10.5px;
+            }
+            .product-detail input#quantity {
+                margin: 5px 0 8px !important;
+                min-height: 30px;
+                padding: 5px 7px;
+            }
+            .product-detail .button {
+                font-size: 11px;
+                min-height: 30px;
+                padding: 6px 7px;
+                width: 100%;
             }
             .thumbnail-grid {
                 gap: 8px;
@@ -177,7 +239,7 @@
             });
     @endphp
 
-    <div class="detail">
+    <div class="detail product-detail">
         <div class="product-gallery" data-zoom-gallery data-default-image="{{ $galleryImages->first()->image_url }}">
             <div class="zoom-stage" data-zoom-stage>
                 <img src="{{ $initialImageUrl }}" alt="{{ $galleryImages->first()->alt_text ?: $product->name }}" data-zoom-image>

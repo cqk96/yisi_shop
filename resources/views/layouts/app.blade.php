@@ -35,12 +35,13 @@
             padding: 10px 12px;
             width: 100%;
         }
+        button {
+            font: inherit;
+        }
         textarea { min-height: 120px; resize: vertical; }
         .topbar {
             background: var(--panel);
             border-bottom: 1px solid var(--line);
-            position: sticky;
-            top: 0;
             z-index: 10;
         }
         .nav {
@@ -72,6 +73,15 @@
             justify-content: center;
             min-height: 60px;
             padding: 10px 12px;
+        }
+        button.top-info-block {
+            color: inherit;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+        }
+        .top-info-block:hover {
+            border-color: var(--brand);
         }
         .top-info-label {
             color: var(--muted);
@@ -301,6 +311,49 @@
             cursor: default;
             opacity: 0.65;
         }
+        .modal-backdrop {
+            align-items: center;
+            background: rgba(15, 23, 42, 0.48);
+            display: none;
+            inset: 0;
+            justify-content: center;
+            padding: 20px;
+            position: fixed;
+            z-index: 100;
+        }
+        .modal-backdrop.is-open {
+            display: flex;
+        }
+        .modal-panel {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 20px 55px rgba(15, 23, 42, 0.26);
+            max-width: 460px;
+            padding: 20px;
+            width: min(100%, 460px);
+        }
+        .modal-head {
+            align-items: center;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .modal-head h2 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .modal-close {
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            cursor: pointer;
+            min-height: 34px;
+            min-width: 34px;
+        }
+        .modal-content p {
+            margin-bottom: 10px;
+        }
         @media (max-width: 760px) {
             .page-head, .summary { align-items: stretch; flex-direction: column; }
             .nav {
@@ -458,17 +511,16 @@
                     <div class="top-info-label">Facebook</div>
                     <span class="top-info-link">Yisi Nails & Beauty</span>
                 </a>
-                <div class="top-info-block">
+                <button class="top-info-block" type="button" data-customer-modal-open>
                     <div class="top-info-label">Información del cliente</div>
                     <div class="top-info-text">
                         <strong>dirección:</strong> Calle Jorge Rodríguez Nápoles #21, Esquina J Espinoza, Las Tunas, Tunas<br>
                         <strong>teléfono:</strong> +53 5 4444894
                     </div>
-                </div>
+                </button>
             </div>
             <div class="nav-links">
                 @include('partials.language-switcher')
-                <a href="{{ route('shop.index') }}">{{ __('ui.common.products') }}</a>
                 <a href="{{ route('orders.index') }}">{{ __('ui.shop.orders') }}</a>
                 <a class="cart-link" href="{{ route('cart.index') }}">{{ __('ui.shop.cart') }} {{ $cartSummary['count'] ?? 0 }}</a>
             </div>
@@ -490,6 +542,71 @@
 
         @yield('content')
     </main>
+
+    <div class="modal-backdrop" data-customer-modal aria-hidden="true">
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="customer-info-title">
+            <div class="modal-head">
+                <h2 id="customer-info-title">Información del cliente</h2>
+                <button class="modal-close" type="button" data-customer-modal-close aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-content">
+                <p><strong>dirección:</strong><br>Calle Jorge Rodríguez Nápoles #21, Esquina J Espinoza, Las Tunas, Tunas</p>
+                <p><strong>teléfono:</strong><br>+53 5 4444894</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = document.querySelector('[data-customer-modal]');
+            var openButton = document.querySelector('[data-customer-modal-open]');
+            var closeButton = document.querySelector('[data-customer-modal-close]');
+
+            function openModal() {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+
+            function closeModal() {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            if (openButton) {
+                openButton.addEventListener('click', openModal);
+            }
+
+            if (closeButton) {
+                closeButton.addEventListener('click', closeModal);
+            }
+
+            if (modal) {
+                modal.addEventListener('click', function (event) {
+                    if (event.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 
