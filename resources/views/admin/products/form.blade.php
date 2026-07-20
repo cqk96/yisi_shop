@@ -5,6 +5,7 @@
 @section('content')
     @php
         $priceMap = $product->exists ? $product->prices->pluck('price', 'currency_code')->all() : [];
+        $discountPriceMap = $product->exists ? $product->prices->pluck('discount_price', 'currency_code')->all() : [];
         $selectedCurrencies = old('enabled_currencies');
         if ($selectedCurrencies === null) {
             $selectedCurrencies = $product->exists ? array_keys($priceMap) : [];
@@ -13,13 +14,15 @@
         $imageList = $product->exists ? $product->images : collect();
         $skuList = old('skus', $product->exists ? $product->skus->map(function ($sku) {
             return [
+                'id' => $sku->id,
                 'name' => $sku->name,
                 'code' => $sku->code,
+                'image_url' => $sku->image_url,
                 'stock' => $sku->stock,
                 'is_active' => $sku->is_active ? 1 : 0,
             ];
         })->all() : []);
-        $skuRows = array_pad($skuList, 6, ['name' => '', 'code' => '', 'stock' => 0, 'is_active' => 1]);
+        $skuRows = array_pad($skuList, 6, ['id' => null, 'name' => '', 'code' => '', 'image_url' => null, 'stock' => 0, 'is_active' => 1]);
     @endphp
 
     <div class="page-head">
@@ -49,11 +52,6 @@
             <div>
                 <label for="name">{{ __('ui.admin.product_name') }}</label>
                 <input id="name" name="name" value="{{ old('name', $product->name) }}" required>
-            </div>
-
-            <div>
-                <label for="slug">Slug</label>
-                <input id="slug" name="slug" value="{{ old('slug', $product->slug) }}" placeholder="{{ __('ui.admin.auto_slug_hint') }}">
             </div>
 
             <div>
@@ -96,17 +94,35 @@
                         @php
                             $isSelected = in_array($currency, $selectedCurrencies, true);
                         @endphp
-                        <div data-currency-price="{{ $currency }}" {{ $isSelected ? '' : 'hidden' }}>
-                            <label for="price_{{ $currency }}">{{ $currency }}</label>
-                            <input
-                                id="price_{{ $currency }}"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                name="prices[{{ $currency }}]"
-                                value="{{ old('prices.' . $currency, $priceMap[$currency] ?? '') }}"
-                                {{ $isSelected ? 'required' : 'disabled' }}
-                            >
+                        <div class="currency-price-card" data-currency-price="{{ $currency }}" {{ $isSelected ? '' : 'hidden' }}>
+                            <h3>{{ $currency }}</h3>
+                            <div class="currency-price-fields">
+                                <div>
+                                    <label for="price_{{ $currency }}">{{ __('ui.admin.regular_price') }}</label>
+                                    <input
+                                        id="price_{{ $currency }}"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        name="prices[{{ $currency }}]"
+                                        value="{{ old('prices.' . $currency, $priceMap[$currency] ?? '') }}"
+                                        data-regular-price
+                                        {{ $isSelected ? 'required' : 'disabled' }}
+                                    >
+                                </div>
+                                <div>
+                                    <label for="discount_price_{{ $currency }}">{{ __('ui.admin.discount_price') }}</label>
+                                    <input
+                                        id="discount_price_{{ $currency }}"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        name="discount_prices[{{ $currency }}]"
+                                        value="{{ old('discount_prices.' . $currency, $discountPriceMap[$currency] ?? '') }}"
+                                        {{ $isSelected ? '' : 'disabled' }}
+                                    >
+                                </div>
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -121,6 +137,7 @@
                             <tr>
                                 <th>{{ __('ui.admin.sku_name') }}</th>
                                 <th>{{ __('ui.admin.sku_code') }}</th>
+                                <th>{{ __('ui.admin.sku_image') }}</th>
                                 <th>{{ __('ui.common.stock') }}</th>
                                 <th>{{ __('ui.admin.enabled') }}</th>
                             </tr>
@@ -128,8 +145,31 @@
                         <tbody>
                             @foreach ($skuRows as $index => $sku)
                                 <tr>
-                                    <td><input name="skus[{{ $index }}][name]" value="{{ $sku['name'] ?? '' }}" placeholder="{{ __('ui.admin.sku_name_placeholder') }}"></td>
+                                    <td>
+                                        <input type="hidden" name="skus[{{ $index }}][id]" value="{{ $sku['id'] ?? '' }}">
+                                        <input type="hidden" name="skus[{{ $index }}][image_url]" value="{{ $sku['image_url'] ?? '' }}">
+                                        <input name="skus[{{ $index }}][name]" value="{{ $sku['name'] ?? '' }}" placeholder="{{ __('ui.admin.sku_name_placeholder') }}">
+                                    </td>
                                     <td><input name="skus[{{ $index }}][code]" value="{{ $sku['code'] ?? '' }}" placeholder="{{ __('ui.admin.sku_code_placeholder') }}"></td>
+                                    <td>
+                                        <div class="sku-image-field">
+                                            @if (! empty($sku['image_url']))
+                                                <img class="sku-image-preview" src="{{ $sku['image_url'] }}" alt="{{ $sku['name'] ?? '' }}">
+                                                <label class="sku-remove-image">
+                                                    <input type="checkbox" name="skus[{{ $index }}][remove_image]" value="1">
+                                                    {{ __('ui.admin.remove_sku_image') }}
+                                                </label>
+                                            @else
+                                                <div class="sku-image-empty">{{ __('ui.admin.no_sku_image') }}</div>
+                                            @endif
+                                            <input
+                                                type="file"
+                                                name="sku_image_files[{{ $index }}]"
+                                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                                data-sku-image-input
+                                            >
+                                        </div>
+                                    </td>
                                     <td><input type="number" min="0" name="skus[{{ $index }}][stock]" value="{{ $sku['stock'] ?? 0 }}"></td>
                                     <td>
                                         <label style="align-items: center; display: flex; gap: 8px; font-weight: 400;">
@@ -235,7 +275,59 @@
             cursor: not-allowed;
         }
         .currency-price-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             margin-top: 6px;
+        }
+        .currency-price-card {
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .currency-price-card h3 {
+            font-size: 15px;
+            margin: 0 0 10px;
+        }
+        .currency-price-fields {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .sku-image-field {
+            display: grid;
+            gap: 8px;
+            min-width: 150px;
+        }
+        .sku-image-preview,
+        .sku-image-empty {
+            aspect-ratio: 1 / 1;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            height: 76px;
+            width: 76px;
+        }
+        .sku-image-preview {
+            background: #ffffff;
+            object-fit: cover;
+        }
+        .sku-image-empty {
+            align-items: center;
+            color: var(--muted);
+            display: flex;
+            font-size: 12px;
+            justify-content: center;
+            text-align: center;
+        }
+        .sku-remove-image {
+            align-items: center;
+            display: flex;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 400;
+            margin: 0;
+        }
+        .sku-remove-image input {
+            width: auto;
         }
         .image-uploader-shell {
             background: #f8fafc;
@@ -297,20 +389,25 @@
         document.addEventListener('DOMContentLoaded', function () {
             var input = document.querySelector('[data-filepond-upload]');
             var currencyToggles = document.querySelectorAll('[data-currency-toggle]');
+            var skuImageInputs = document.querySelectorAll('[data-sku-image-input]');
 
             function syncCurrencyField(toggle) {
                 var priceWrap = document.querySelector('[data-currency-price="' + toggle.value + '"]');
                 var option = toggle.closest('[data-currency-option]');
-                var priceInput = priceWrap ? priceWrap.querySelector('input') : null;
+                var priceInputs = priceWrap ? priceWrap.querySelectorAll('input') : [];
+                var regularPriceInput = priceWrap ? priceWrap.querySelector('[data-regular-price]') : null;
                 var enabled = toggle.checked;
 
                 if (priceWrap) {
                     priceWrap.hidden = !enabled;
                 }
 
-                if (priceInput) {
+                priceInputs.forEach(function (priceInput) {
                     priceInput.disabled = !enabled;
-                    priceInput.required = enabled;
+                });
+
+                if (regularPriceInput) {
+                    regularPriceInput.required = enabled;
                 }
 
                 if (option) {
@@ -322,6 +419,32 @@
                 syncCurrencyField(toggle);
                 toggle.addEventListener('change', function () {
                     syncCurrencyField(toggle);
+                });
+            });
+
+            skuImageInputs.forEach(function (skuImageInput) {
+                skuImageInput.addEventListener('change', function () {
+                    var file = skuImageInput.files && skuImageInput.files[0] ? skuImageInput.files[0] : null;
+                    var field = skuImageInput.closest('.sku-image-field');
+                    var preview = field ? field.querySelector('.sku-image-preview') : null;
+                    var empty = field ? field.querySelector('.sku-image-empty') : null;
+
+                    if (!file || !field) {
+                        return;
+                    }
+
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.className = 'sku-image-preview';
+                        preview.alt = '';
+                        field.insertBefore(preview, field.firstChild);
+                    }
+
+                    if (empty) {
+                        empty.remove();
+                    }
+
+                    preview.src = URL.createObjectURL(file);
                 });
             });
 

@@ -8,7 +8,10 @@
             <h1>{{ __('ui.checkout.order_success') }}</h1>
             <p class="muted">{{ __('ui.checkout.order_no') }}: {{ $order->order_no }}</p>
         </div>
-        <a class="button" href="{{ route('shop.index') }}">{{ __('ui.shop.continue_shopping') }}</a>
+        <div class="line-actions">
+            <a class="button secondary" href="{{ route('orders.index') }}">{{ __('ui.shop.my_orders') }}</a>
+            <a class="button" href="{{ route('shop.index') }}">{{ __('ui.shop.continue_shopping') }}</a>
+        </div>
     </div>
 
     <div class="panel" style="margin-bottom: 18px;">
@@ -48,5 +51,14 @@
 
     <div class="summary">
         <strong>{{ __('ui.checkout.order_total') }}: {{ $order->currency }} {{ number_format($order->total, 2) }}</strong>
+        @if (in_array($order->status, ['pending', 'paid'], true))
+            <form method="post" action="{{ route('orders.cancel', $order) }}">
+                @csrf
+                @method('patch')
+                <button class="button danger" type="submit" onclick="return confirm('{{ __('ui.checkout.confirm_cancel_order') }}')">
+                    {{ __('ui.checkout.cancel_order') }}
+                </button>
+            </form>
+        @endif
     </div>
 @endsection

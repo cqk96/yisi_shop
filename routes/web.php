@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ProductQrCodeController as AdminProductQrCodeCont
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MyOrderController;
 use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,7 +35,9 @@ Route::delete('/cart/items/{sku}', [CartController::class, 'destroy'])->name('ca
 
 Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
+Route::get('/orders', [MyOrderController::class, 'index'])->name('orders.index');
+Route::get('/orders/{order}', [MyOrderController::class, 'show'])->name('orders.show');
+Route::patch('/orders/{order}/cancel', [MyOrderController::class, 'cancel'])->name('orders.cancel');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');

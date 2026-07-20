@@ -261,7 +261,18 @@ class DatabaseSeeder extends Seeder
             $productData['stock'] = collect($skus)->sum('stock');
             $productData['is_active'] = true;
 
-            $product = Product::updateOrCreate(['slug' => $productData['slug']], $productData);
+            $product = Product::where('category_id', $productData['category_id'])
+                ->where('name', $productData['name'])
+                ->first();
+
+            if ($product) {
+                $product->fill($productData);
+                $product->slug = (string) $product->id;
+                $product->save();
+            } else {
+                $product = Product::create($productData);
+                $product->update(['slug' => (string) $product->id]);
+            }
 
             $product->images()->updateOrCreate(
                 ['sort_order' => 0],
@@ -279,10 +290,15 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
-            foreach (['USD' => round($productData['price'] / 7.2, 2), 'HKD' => round($productData['price'] / 0.92, 2), 'CUP' => round($productData['price'] * 3.4, 2)] as $currency => $price) {
+            $product->prices()->whereNotIn('currency_code', ['USD', 'CUP'])->delete();
+
+            foreach (['USD' => round($productData['price'] / 7.2, 2), 'CUP' => round($productData['price'] * 3.4, 2)] as $currency => $price) {
                 $product->prices()->updateOrCreate(
                     ['currency_code' => $currency],
-                    ['price' => $price]
+                    [
+                        'price' => $price,
+                        'discount_price' => round($price * 0.9, 2),
+                    ]
                 );
             }
 

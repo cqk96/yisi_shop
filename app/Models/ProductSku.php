@@ -13,6 +13,7 @@ class ProductSku extends Model
         'product_id',
         'name',
         'code',
+        'image_url',
         'stock',
         'sort_order',
         'is_active',

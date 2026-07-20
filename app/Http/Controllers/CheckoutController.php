@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Services\CartService;
+use App\Services\CustomerOrderSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -23,7 +24,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(Request $request, CartService $cart)
+    public function store(Request $request, CartService $cart, CustomerOrderSession $customerOrders)
     {
         $data = $request->validate([
             'customer_name' => ['required', 'string', 'max:50'],
@@ -78,20 +79,8 @@ class CheckoutController extends Controller
         });
 
         $cart->clear();
+        $customerOrders->remember($order);
 
         return redirect()->route('orders.show', $order)->with('status', __('ui.messages.order_submitted'));
-    }
-
-    public function show(Order $order)
-    {
-        return view('checkout.show', [
-            'order' => $order->load('items'),
-            'cartSummary' => [
-                'items' => collect(),
-                'count' => 0,
-                'currency' => 'USD',
-                'total' => 0,
-            ],
-        ]);
     }
 }

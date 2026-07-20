@@ -31,15 +31,23 @@
                         </td>
                         <td>{{ $product->category->name ?? '-' }}</td>
                         <td>
-                            @foreach ($product->prices->whereIn('currency_code', ['USD', 'HKD', 'CUP']) as $price)
-                                <div>{{ $price->currency_code }} {{ number_format($price->price, 2) }}</div>
+                            @foreach ($product->prices->whereIn('currency_code', ['USD', 'CUP']) as $price)
+                                <div>
+                                    {{ $price->currency_code }}
+                                    @if ($price->hasDiscount())
+                                        {{ number_format($price->discount_price, 2) }}
+                                        <span class="muted" style="text-decoration: line-through;">{{ number_format($price->price, 2) }}</span>
+                                    @else
+                                        {{ number_format($price->price, 2) }}
+                                    @endif
+                                </div>
                             @endforeach
                         </td>
                         <td>{{ number_format($product->sales_count) }}</td>
                         <td>
                             <strong>{{ __('ui.admin.total_stock') }} {{ $product->stock }}</strong>
                             @foreach ($product->skus->take(4) as $sku)
-                                <div class="muted">{{ $sku->name }}：{{ $sku->stock }}</div>
+                                <div class="muted">{{ $sku->name }}: {{ $sku->stock }}</div>
                             @endforeach
                         </td>
                         <td>

@@ -115,6 +115,19 @@
         .sku-option input {
             width: auto;
         }
+        .sku-option-main {
+            align-items: center;
+            display: flex;
+            gap: 10px;
+            min-width: 0;
+        }
+        .sku-option-image {
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            height: 42px;
+            object-fit: cover;
+            width: 42px;
+        }
         .sku-option:has(input:checked) {
             border-color: var(--brand);
             box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.14);
@@ -145,14 +158,20 @@
         $galleryImages = $product->images->count()
             ? $product->images
             : collect([(object) ['image_url' => $product->primaryImage(), 'alt_text' => $product->name]]);
-        $displayCurrency = $product->displayCurrency();
-        $displayPrice = $product->displayPrice();
+        $initialImageUrl = $firstSku && $firstSku->image_url
+            ? $firstSku->image_url
+            : $galleryImages->first()->image_url;
+        $visiblePrices = $product->prices
+            ->whereIn('currency_code', ['USD', 'CUP'])
+            ->sortBy(function ($price) {
+                return ['USD' => 0, 'CUP' => 1][$price->currency_code] ?? 99;
+            });
     @endphp
 
     <div class="detail">
-        <div class="product-gallery" data-zoom-gallery>
+        <div class="product-gallery" data-zoom-gallery data-default-image="{{ $galleryImages->first()->image_url }}">
             <div class="zoom-stage" data-zoom-stage>
-                <img src="{{ $galleryImages->first()->image_url }}" alt="{{ $galleryImages->first()->alt_text ?: $product->name }}" data-zoom-image>
+                <img src="{{ $initialImageUrl }}" alt="{{ $galleryImages->first()->alt_text ?: $product->name }}" data-zoom-image>
                 @if ($galleryImages->count() > 1)
                     <button class="gallery-arrow prev" type="button" data-gallery-prev aria-label="{{ __('ui.shop.previous_image') }}">&lsaquo;</button>
                     <button class="gallery-arrow next" type="button" data-gallery-next aria-label="{{ __('ui.shop.next_image') }}">&rsaquo;</button>
@@ -180,15 +199,18 @@
             <p class="muted">{{ $product->category->name }}</p>
             <h1>{{ $product->name }}</h1>
             <p>{{ $product->description }}</p>
-            <p class="price">{{ $displayCurrency }} {{ number_format($displayPrice, 2) }}</p>
-
-            @if ($product->prices->whereIn('currency_code', ['USD', 'HKD', 'CUP'])->count() > 1)
-                <p class="muted">
-                    @foreach ($product->prices->whereIn('currency_code', ['USD', 'HKD', 'CUP']) as $price)
-                        {{ $price->currency_code }} {{ number_format($price->price, 2) }}{{ $loop->last ? '' : ' / ' }}
-                    @endforeach
-                </p>
-            @endif
+            <p class="price price-stack">
+                @forelse ($visiblePrices as $price)
+                    <span>
+                        {{ $price->currency_code }} {{ number_format($price->effectivePrice(), 2) }}
+                        @if ($price->hasDiscount())
+                            <span class="original-price">{{ number_format($price->price, 2) }}</span>
+                        @endif
+                    </span>
+                @empty
+                    <span>{{ $product->displayCurrency() }} {{ number_format($product->displayPrice(), 2) }}</span>
+                @endforelse
+            </p>
 
             <form method="post" action="{{ route('cart.items.store') }}">
                 @csrf
@@ -202,14 +224,22 @@
                                     name="sku_id"
                                     value="{{ $sku->id }}"
                                     data-stock="{{ $sku->stock }}"
+                                    data-sku-image="{{ $sku->image_url }}"
                                     {{ $loop->first ? 'checked' : '' }}
                                     {{ $sku->stock <= 0 ? 'disabled' : '' }}
                                     required
                                 >
-                                {{ $sku->name }}
-                                @if ($sku->code)
-                                    <span class="muted">({{ $sku->code }})</span>
-                                @endif
+                                <span class="sku-option-main">
+                                    @if ($sku->image_url)
+                                        <img class="sku-option-image" src="{{ $sku->image_url }}" alt="{{ $sku->name }}">
+                                    @endif
+                                    <span>
+                                        {{ $sku->name }}
+                                        @if ($sku->code)
+                                            <span class="muted">({{ $sku->code }})</span>
+                                        @endif
+                                    </span>
+                                </span>
                             </span>
                             <span class="muted">{{ __('ui.common.stock') }} {{ $sku->stock }}</span>
                         </label>
@@ -230,6 +260,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var gallery = document.querySelector('[data-zoom-gallery]');
+            var updateGalleryImage = function () {};
 
             if (gallery) {
                 var stage = gallery.querySelector('[data-zoom-stage]');
@@ -241,6 +272,7 @@
                 var nextButton = gallery.querySelector('[data-gallery-next]');
                 var zoom = 2.6;
                 var currentIndex = 0;
+                var defaultImageSrc = gallery.dataset.defaultImage || image.currentSrc || image.src;
 
                 function setPreviewImage(src) {
                     preview.style.backgroundImage = 'url("' + src + '")';
@@ -262,6 +294,15 @@
                     });
                     thumb.classList.add('is-active');
                 }
+
+                updateGalleryImage = function (src) {
+                    image.src = src || defaultImageSrc;
+                    setPreviewImage(image.src);
+
+                    thumbs.forEach(function (item) {
+                        item.classList.remove('is-active');
+                    });
+                };
 
                 function imageContentRect() {
                     var rect = image.getBoundingClientRect();
@@ -339,9 +380,12 @@
             skuRadios.forEach(function (radio) {
                 radio.addEventListener('change', function () {
                     var stock = parseInt(radio.dataset.stock || '0', 10);
+                    var skuImage = radio.dataset.skuImage || '';
                     quantity.max = Math.max(1, stock);
                     quantity.value = Math.min(parseInt(quantity.value || '1', 10), Math.max(1, stock));
                     stockText.textContent = stock;
+
+                    updateGalleryImage(skuImage);
                 });
             });
         });

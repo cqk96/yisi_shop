@@ -46,14 +46,47 @@
         .nav {
             align-items: center;
             display: flex;
-            gap: 18px;
+            gap: 20px;
             justify-content: space-between;
             margin: 0 auto;
             max-width: 1180px;
-            padding: 10px 20px;
+            min-height: 96px;
+            padding: 16px 20px;
         }
         .brand { align-items: center; display: inline-flex; }
         .brand img { display: block; height: 56px; width: auto; }
+        .top-info {
+            align-items: stretch;
+            display: grid;
+            flex: 1;
+            gap: 12px;
+            grid-template-columns: minmax(150px, 0.7fr) minmax(260px, 1.3fr);
+            min-width: 0;
+        }
+        .top-info-block {
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 60px;
+            padding: 10px 12px;
+        }
+        .top-info-label {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.2;
+            margin-bottom: 3px;
+        }
+        .top-info-link {
+            color: #1877f2;
+            font-weight: 700;
+        }
+        .top-info-text {
+            font-size: 13px;
+            line-height: 1.35;
+        }
         .nav-links { align-items: center; display: flex; gap: 12px; }
         .language-switcher {
             align-items: center;
@@ -150,6 +183,18 @@
             padding: 16px;
         }
         .price { color: var(--accent); font-size: 20px; font-weight: 700; }
+        .price-stack {
+            align-items: flex-start;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .original-price {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 400;
+            text-decoration: line-through;
+        }
         .product-meta {
             align-items: center;
             display: flex;
@@ -257,8 +302,51 @@
             opacity: 0.65;
         }
         @media (max-width: 760px) {
-            .page-head, .summary, .nav { align-items: stretch; flex-direction: column; }
-            .brand img { height: 48px; }
+            .page-head, .summary { align-items: stretch; flex-direction: column; }
+            .nav {
+                align-items: center;
+                display: grid;
+                gap: 10px;
+                grid-template-columns: auto minmax(0, 1fr);
+                min-height: 88px;
+                padding: 10px 12px;
+            }
+            .brand img { height: 46px; }
+            .top-info {
+                gap: 6px;
+                grid-template-columns: minmax(78px, 0.55fr) minmax(0, 1.45fr);
+                min-width: 0;
+            }
+            .top-info-block {
+                border-radius: 7px;
+                min-height: 50px;
+                padding: 6px 8px;
+            }
+            .top-info-label {
+                font-size: 10px;
+                margin-bottom: 1px;
+            }
+            .top-info-link {
+                display: block;
+                font-size: 12px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .top-info-text {
+                display: -webkit-box;
+                font-size: 10.5px;
+                line-height: 1.25;
+                max-height: 40px;
+                overflow: hidden;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                grid-column: 1 / -1;
+                justify-content: center;
+            }
             .detail, .form-grid { grid-template-columns: 1fr; }
             .table { display: block; overflow-x: auto; }
         }
@@ -270,9 +358,23 @@
             <a class="brand" href="{{ route('shop.index') }}">
                 <img src="{{ asset('images/yisi-logo.png') }}" alt="Yisi Nails & Beauty">
             </a>
+            <div class="top-info">
+                <a class="top-info-block top-info-facebook" href="https://www.facebook.com/share/1Jut9vRjXA/" target="_blank" rel="noopener">
+                    <div class="top-info-label">Facebook</div>
+                    <span class="top-info-link">Yisi Nails & Beauty</span>
+                </a>
+                <div class="top-info-block">
+                    <div class="top-info-label">Información del cliente</div>
+                    <div class="top-info-text">
+                        <strong>dirección:</strong> Calle Jorge Rodríguez Nápoles #21, Esquina J Espinoza, Las Tunas, Tunas<br>
+                        <strong>teléfono:</strong> +53 5 4444894
+                    </div>
+                </div>
+            </div>
             <div class="nav-links">
                 @include('partials.language-switcher')
                 <a href="{{ route('shop.index') }}">{{ __('ui.common.products') }}</a>
+                <a href="{{ route('orders.index') }}">{{ __('ui.shop.orders') }}</a>
                 <a class="cart-link" href="{{ route('cart.index') }}">{{ __('ui.shop.cart') }} {{ $cartSummary['count'] ?? 0 }}</a>
             </div>
         </nav>

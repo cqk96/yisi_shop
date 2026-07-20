@@ -11,8 +11,7 @@ class Product extends Model
 
     private const DISPLAY_CURRENCY_PRIORITY = [
         'USD' => 0,
-        'HKD' => 1,
-        'CUP' => 2,
+        'CUP' => 1,
     ];
 
     protected $fillable = [
@@ -75,7 +74,7 @@ class Product extends Model
     {
         $price = $this->prices->firstWhere('currency_code', strtoupper($currencyCode));
 
-        return $price ? $price->price : $this->price;
+        return $price ? $price->effectivePrice() : $this->price;
     }
 
     public function displayPriceRecord()
@@ -96,7 +95,26 @@ class Product extends Model
     {
         $price = $this->displayPriceRecord();
 
+        return $price ? $price->effectivePrice() : (float) $this->price;
+    }
+
+    public function displayRegularPrice(): float
+    {
+        $price = $this->displayPriceRecord();
+
         return $price ? (float) $price->price : (float) $this->price;
+    }
+
+    public function displayDiscountPrice(): ?float
+    {
+        $price = $this->displayPriceRecord();
+
+        return $price && $price->hasDiscount() ? (float) $price->discount_price : null;
+    }
+
+    public function hasDisplayDiscount(): bool
+    {
+        return $this->displayDiscountPrice() !== null;
     }
 
     public function displayCurrency(): string

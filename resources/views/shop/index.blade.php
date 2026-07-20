@@ -33,8 +33,11 @@
             @php
                 $firstSku = $product->activeSkus->first();
                 $stock = $product->availableStock();
-                $displayCurrency = $product->displayCurrency();
-                $displayPrice = $product->displayPrice();
+                $visiblePrices = $product->prices
+                    ->whereIn('currency_code', ['USD', 'CUP'])
+                    ->sortBy(function ($price) {
+                        return ['USD' => 0, 'CUP' => 1][$price->currency_code] ?? 99;
+                    });
             @endphp
             <article class="card">
                 <a href="{{ route('products.show', $product) }}">
@@ -46,7 +49,18 @@
                     </h2>
                     <p class="muted">{{ $product->category->name }}</p>
                     <div class="product-meta">
-                        <span class="price">{{ $displayCurrency }} {{ number_format($displayPrice, 2) }}</span>
+                        <span class="price price-stack">
+                            @forelse ($visiblePrices as $price)
+                                <span>
+                                    {{ $price->currency_code }} {{ number_format($price->effectivePrice(), 2) }}
+                                    @if ($price->hasDiscount())
+                                        <span class="original-price">{{ number_format($price->price, 2) }}</span>
+                                    @endif
+                                </span>
+                            @empty
+                                <span>{{ $product->displayCurrency() }} {{ number_format($product->displayPrice(), 2) }}</span>
+                            @endforelse
+                        </span>
                         <span class="muted">{{ __('ui.common.stock') }} {{ $stock }}</span>
                     </div>
                     @if ($firstSku)
