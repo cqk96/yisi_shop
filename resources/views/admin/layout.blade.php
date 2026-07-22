@@ -61,6 +61,12 @@
             justify-content: space-between;
             margin-bottom: 18px;
         }
+        .page-title-actions {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
         h1 { font-size: 26px; margin: 0; }
         h2 { font-size: 18px; margin: 0 0 14px; }
         .muted { color: var(--muted); }
@@ -90,6 +96,17 @@
         }
         .button:hover { background: var(--brand-dark); }
         .button.secondary { background: #ffffff; border: 1px solid var(--line); color: var(--ink); }
+        .button.soft {
+            background: #ecfdf5;
+            border: 1px solid #99f6e4;
+            color: #0f766e;
+            min-height: 34px;
+            padding: 6px 10px;
+        }
+        .button.soft:hover {
+            background: #ccfbf1;
+            color: #115e59;
+        }
         .button.danger { background: var(--danger); }
         .table { border-collapse: collapse; width: 100%; }
         .table th, .table td { border-bottom: 1px solid var(--line); padding: 13px; text-align: left; vertical-align: middle; }

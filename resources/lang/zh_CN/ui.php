@@ -167,6 +167,7 @@ return [
         'order_total' => '订单合计',
         'sku_name_placeholder' => '如：红色 / 30ml / A 款',
         'sku_code_placeholder' => '如：SKU-RED-001',
+        'shop_home_qr_code' => '店铺首页二维码',
     ],
     'status' => [
         'pending' => '待处理',

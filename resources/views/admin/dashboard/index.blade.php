@@ -4,7 +4,10 @@
 
 @section('content')
     <div class="page-head">
-        <h1>{{ __('ui.admin.dashboard') }}</h1>
+        <div class="page-title-actions">
+            <h1>{{ __('ui.admin.dashboard') }}</h1>
+            <a class="button soft" href="{{ route('admin.shop.qr-code') }}" target="_blank">{{ __('ui.admin.shop_home_qr_code') }}</a>
+        </div>
         <a class="button" href="{{ route('admin.products.create') }}">{{ __('ui.admin.add_product') }}</a>
     </div>
 

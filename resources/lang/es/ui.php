@@ -152,6 +152,7 @@ return [
         'sales' => 'Ventas',
         'total_stock' => 'Stock total',
         'qr_code' => 'Código QR',
+        'shop_home_qr_code' => 'QR de la tienda',
         'latest_products' => 'Productos recientes',
         'order_no' => 'Pedido No.',
         'customer' => 'Cliente',

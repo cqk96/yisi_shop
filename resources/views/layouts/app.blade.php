@@ -521,8 +521,8 @@
                 <button class="top-info-block" type="button" data-customer-modal-open>
                     <div class="top-info-label">Información del cliente</div>
                     <div class="top-info-text">
-                        <strong>dirección:</strong> Calle Jorge Rodríguez Nápoles #21, Esquina J Espinoza, Las Tunas, Tunas<br>
-                        <strong>teléfono:</strong> +53 5 4444894
+                        <strong>WhatsApp:</strong> https://whatsapp.com/channel/0029Vb8sUfM6LwHs79N8Eq29<br>
+                        <strong>dirección:</strong> Calle Jorge Rodríguez Nápoles #21, Esquina J Espinoza, Las Tunas, Tunas
                     </div>
                 </button>
             </div>
@@ -557,8 +557,8 @@
                 <button class="modal-close" type="button" data-customer-modal-close aria-label="Cerrar">×</button>
             </div>
             <div class="modal-content">
+                <p><strong>WhatsApp:</strong><br><a class="top-info-link" href="https://whatsapp.com/channel/0029Vb8sUfM6LwHs79N8Eq29" target="_blank" rel="noopener">https://whatsapp.com/channel/0029Vb8sUfM6LwHs79N8Eq29</a></p>
                 <p><strong>dirección:</strong><br>Calle Jorge Rodríguez Nápoles #21, Esquina J Espinoza, Las Tunas, Tunas</p>
-                <p><strong>teléfono:</strong><br>+53 5 4444894</p>
             </div>
         </div>
     </div>

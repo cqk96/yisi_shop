@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductQrCodeController as AdminProductQrCodeController;
+use App\Http\Controllers\Admin\ShopQrCodeController as AdminShopQrCodeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LocaleController;
@@ -48,6 +49,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
         Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update']);
+        Route::get('shop/qr-code', [AdminShopQrCodeController::class, 'show'])->name('shop.qr-code');
         Route::get('products/{product}/qr-code', [AdminProductQrCodeController::class, 'show'])->name('products.qr-code');
         Route::resource('products', AdminProductController::class)->except(['show']);
     });
