@@ -88,7 +88,7 @@ return [
     ],
     'admin' => [
         'title' => 'Administración',
-        'brand' => 'LaravelShop Admin',
+        'brand' => 'Yisi Shop',
         'login' => 'Iniciar sesión',
         'login_title' => 'Acceso de administrador',
         'login_hint' => 'Usa una cuenta de superadministrador para entrar al panel.',

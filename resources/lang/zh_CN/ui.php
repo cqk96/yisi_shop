@@ -88,7 +88,7 @@ return [
     ],
     'admin' => [
         'title' => '后台管理',
-        'brand' => 'LaravelShop 后台',
+        'brand' => 'Yisi Shop',
         'login' => '登录',
         'login_title' => '后台登录',
         'login_hint' => '使用超级管理员账号进入商城后台。',
